@@ -1,5 +1,7 @@
 # epsilon-greedy example implementation of a multi-armed bandit
+import collections
 import random
+import numpy as np
 
 class Bandit:
     """
@@ -12,11 +14,18 @@ class Bandit:
         :param arms: List of arms
         :param epsilon: Epsilon value for random exploration
         """
+        self.EPSILON_MIN = 0.01
+
         self.arms = arms
         self.epsilon = epsilon
+        self.expected_values = [0] * len(arms)
+
+        self.WINDOW = 15
+        self.windows = [collections.deque(maxlen=self.WINDOW) for _ in range(len(arms))]
         self.frequencies = [0] * len(arms)
         self.sums = [0] * len(arms)
-        self.expected_values = [0] * len(arms)
+
+        self.iteration = 0
 
     def run(self):
         """
@@ -24,11 +33,22 @@ class Bandit:
 
         :return: Returns the arm the bandit recommends pulling
         """
+
+        # Index of arm with highest expected value
+        index = self.expected_values.index(max(self.expected_values))
+
         if min(self.frequencies) == 0:
-            return self.arms[self.frequencies.index(min(self.frequencies))]
-        if random.random() < self.epsilon:
-            return self.arms[random.randint(0, len(self.arms) - 1)]
-        return self.arms[self.expected_values.index(max(self.expected_values))]
+            # index of arm which has not been pulled yet
+            index = self.frequencies.index(min(self.frequencies))
+        elif random.random() < self.epsilon:
+            # random arm with p = eps.
+            index = random.randint(0, len(self.arms) - 1)
+
+        # decrease epsilon
+        if self.epsilon > self.EPSILON_MIN:
+            self.epsilon = 0.97 * self.epsilon
+
+        return self.arms[index]
 
     def give_feedback(self, arm, reward):
         """
@@ -38,9 +58,13 @@ class Bandit:
         :param reward: The reward that was generated
         """
         arm_index = self.arms.index(arm)
-        sum = self.sums[arm_index] + reward
-        self.sums[arm_index] = sum
-        frequency = self.frequencies[arm_index] + 1
+        self.sums[arm_index] = self.sums[arm_index] + reward
+
+        # append the reward to the rewards of this arm, automatically looses oldest reward
+        self.windows[arm_index].append(reward)
+
+        reward_sum = sum(self.windows[arm_index])
+        frequency = len(self.windows[arm_index])
         self.frequencies[arm_index] = frequency
-        expected_value = sum / frequency
+        expected_value = reward_sum / frequency
         self.expected_values[arm_index] = expected_value
