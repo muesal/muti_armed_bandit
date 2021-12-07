@@ -33,6 +33,8 @@
         \item how you could improve further, i.e. describe and motivate potential improvements.\\
     \end{itemize}
 
+    We use a sliding window over all pulled arms, not one per arm.
+    This prevents the bandit from focusing one one arm only, because all arms are pulled at least once per window since their frequency in the window will become 0.
 }
 
 \end{document}
