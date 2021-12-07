@@ -5,14 +5,16 @@ from random import gauss
 from numpy.random import normal, seed
 seed(0)
 
+
 def determine_rand_norm():
-  """
-  Determine random int, roughly normally distributed
-  """
-  number = round(normal(uniform(1,5), 2))
-  if number not in range(0,6):
+    """
+    Determine random int, roughly normally distributed
+    """
+    number = round(normal(uniform(1,5), 2))
+    if number not in range(0,6):
       return determine_rand_norm()
-  return number
+    return number
+
 
 def generate_reward(arm_index, expected_rewards_approx):
     """

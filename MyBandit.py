@@ -3,10 +3,12 @@ import collections
 import random
 import numpy as np
 
+
 class Bandit:
     """
     Generic epsilon-greedy bandit that you need to improve
     """
+
     def __init__(self, arms, epsilon=0.1):
         """
         Initiates the bandits
@@ -19,11 +21,12 @@ class Bandit:
         self.arms = arms
         self.epsilon = epsilon
         self.expected_values = [0] * len(arms)
-
-        self.WINDOW = 15
-        self.windows = [collections.deque(maxlen=self.WINDOW) for _ in range(len(arms))]
-        self.frequencies = [0] * len(arms)
         self.sums = [0] * len(arms)
+        self.frequencies = [0] * len(arms)
+
+        self.WINDOW = 38
+        self.windows = np.zeros((len(arms), self.WINDOW))
+        self.windows_frequencies = np.zeros((len(arms), self.WINDOW))
 
         self.iteration = 0
 
@@ -44,9 +47,9 @@ class Bandit:
             # random arm with p = eps.
             index = random.randint(0, len(self.arms) - 1)
 
-        # decrease epsilon
-        if self.epsilon > self.EPSILON_MIN:
-            self.epsilon = 0.97 * self.epsilon
+        # decrease epsilon, makes our optimization worse
+        # if self.epsilon > self.EPSILON_MIN:
+        #    self.epsilon = 0.97 * self.epsilon
 
         return self.arms[index]
 
@@ -57,14 +60,30 @@ class Bandit:
         :param arm: The arm that was pulled to generate the reward
         :param reward: The reward that was generated
         """
+        # get pulled arm
         arm_index = self.arms.index(arm)
+
+        # add the reward to the rewards of this arm
         self.sums[arm_index] = self.sums[arm_index] + reward
 
-        # append the reward to the rewards of this arm, automatically looses oldest reward
-        self.windows[arm_index].append(reward)
+        # set all windows/_frequencies of this iteration to zero, set the reward and pulled arm to true
+        self.windows[:, self.iteration] = 0
+        self.windows[arm_index, self.iteration] = reward
 
-        reward_sum = sum(self.windows[arm_index])
-        frequency = len(self.windows[arm_index])
-        self.frequencies[arm_index] = frequency
-        expected_value = reward_sum / frequency
-        self.expected_values[arm_index] = expected_value
+        self.windows_frequencies[:, self.iteration] = 0
+        self.windows_frequencies[arm_index, self.iteration] = 1
+
+        # get the frequencies in the current window
+        self.frequencies = [sum(self.windows_frequencies[row, :]) for row in range(len(self.arms))]
+
+        # recompute all expected values
+        for i in range(len(self.arms)):
+            value = 0
+            if self.frequencies[i] != 0:
+                value = sum(self.windows[i, :]) / self.frequencies[i]
+            self.expected_values[i] = value
+
+        # increase iteration, set to zero if end of window reached
+        self.iteration += 1
+        if self.iteration >= self.WINDOW:
+            self.iteration = 0
