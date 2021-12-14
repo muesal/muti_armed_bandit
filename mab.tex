@@ -14,7 +14,13 @@
 \floatname{algorithm}{Algorithm}
 \newcommand{\todo}[1]{{\color{red}#1}}
 
-\title{Multi-Armed Bandit}
+\title{
+    Reinforcement Learning
+    \vspace{3em}
+    {\large Umeå University \\
+    Artificial Intelligence - Methods and Applications (5DV181)}
+    \vspace{3em}
+}
 \author{Salome Müller, Lucas Galery Käser}
 \date{\today}
 
@@ -23,18 +29,49 @@
 %% Make the title
 \maketitle
 
-\todo{add course number to title}
+\todo{add pong gif/picture to title page}
 
-\todo{
-    Write a short report (one page) section that describes:
-    \begin{itemize}
-        \item how you proceeded, i.e. describe your solution approach conceptually and precisely;\\
-        \item what your results are, i.e. provide quantification and optionally visualization of your results;\\
-        \item how you could improve further, i.e. describe and motivate potential improvements.\\
-    \end{itemize}
+\pagebreak
 
-    We use a sliding window over all pulled arms, not one per arm.
-    This prevents the bandit from focusing one one arm only, because all arms are pulled at least once per window since their frequency in the window will become 0.
-}
+%% start the content for multi armed bandit followed by pong
+\section{Multi-Armed Bandit}\label{sec:mab}
+We start by describing the improvements we did on the multi-armed bandit, the reached results and further work that could be done to improve the bandit.
+
+\subsection{Improving the Bandit}\label{subsec:improving-the-bandit}
+In order t improve the bandit, we first introduced epsilon decay.
+This way, 13 of the 20 simulations could be won.
+Since our bandit must win at least 16 of the simulations, we introduced another improvement method, namely sliding window.
+
+\subsubsection{Sliding Window}
+We implemented one sliding window over all arms.
+We added a constant \texttt{window\_size} which defines how big the window is, i.e., the amount of past actions that are be considered by the agent.
+Further we added two arrays: one for the frequencies of the arms in the sliding window and one for the sum of rewards inside the window.
+The expected value of each arm is then computed from those two arrays.
+
+This method ensures, that all arms are frequently tested.
+If a window per arm or no window at all is used, arms that give a bad reward for the first pull will never be tried again, and possible changes in the environment will not be considered.
+With the sliding window over all arms, this is prevented, and a good balance between exploitation and exploration can be found.
+
+\subsubsection{Tuning Parameters}
+For the siding window it turned out to yield the best result with size 38.
+Then, all 20 simulations are won.
+When only using epsilon decay, the best parameters are a decay of 0.97 after each iteration, until epsilon reaches a minimal value of 0.01.
+All these values were found with experiments: we run the program with different values, and chose the ones that yielded the highest amount of won simulations.
+
+
+\subsection{Results}\label{subsec:mab-results}
+With the sliding window our bandit wins 20 of 20 simulations.
+This shows that it finds good arms quickly, and also adapts to change in the environment fast.
+It seems to be a very good balance between exploitation and exploration.
+
+Using the epsilon-decay without sliding window lead to the agent winning 13 of the simulations, but the bandit focused on one arm mostly.
+The bad rewards some arms got in the first simulation could not be revised by exploitation.
+The combination of both algorithmic approaches led to the bandit winning 17 of the 20 simulations.
+We assume this is due to the fact that the sliding window alone provides a good exploration-exploitation balance already, and the epsilon-greedy approach messes with that.
+
+
+\subsection{Further Optimization}\label{subsec:mab-further-optimization}
+we only get a reward 35\% higher than a naive implementation, would be interesting to see whether we could win against other optimized algorithms like the ones stated in tha papers
+
 
 \end{document}
