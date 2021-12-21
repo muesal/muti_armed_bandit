@@ -11,17 +11,22 @@
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
+\usepackage{hyperref}
 \floatname{algorithm}{Algorithm}
 \newcommand{\todo}[1]{{\color{red}#1}}
 
 \title{
-    Reinforcement Learning
+    Assignment 2 -- Reinforcement Learning\\
     \vspace{3em}
     {\large Umeå University \\
-    Artificial Intelligence - Methods and Applications (5DV181)}
-    \vspace{3em}
+    Artificial Intelligence -- Methods and Applications (5DV181)}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.6\textwidth]{pong}
+    \end{figure}
+    \vspace{2em}
 }
-\author{Salome Müller, Lucas Galery Käser}
+\author{Salome Müller, \texttt{mcs21smr}\\ Lucas Galery Käser, \texttt{mcs21lgr}}
 \date{\today}
 
 \begin{document}
@@ -29,7 +34,7 @@
 %% Make the title
 \maketitle
 
-\todo{add pong gif/picture to title page}
+%\todo{add pong gif/picture to title page}
 
 \pagebreak
 
@@ -73,5 +78,46 @@ We assume this is due to the fact that the sliding window alone provides a good 
 \subsection{Further Optimization}\label{subsec:mab-further-optimization}
 We tuned the parameters of our agent by hand, they probably could be improved using a script that tests a wider range of values systematically.
 To further optimize, it would be interesting to run our agent against other optimized agents.
+
+
+\section{Pong}\label{sec:pong}
+Next, we describe how we improved our pong-playing agent, what results our agent was able to achieve, and how it could be further optimized.
+
+\subsection{Improving the Agent}\label{subsec:improving-the-agent}
+Improving the agent consisted mostly of two parts: implementing a reasonable abstraction for the state space and tuning all the parameters.
+
+\subsubsection{Choosing a State-Space Abstraction}
+Our final state-space abstraction was developed iteratively.
+We started by deciding that we only want to focus on the positional data for our own agent and therefore disregard the two data points for the opponent's position.
+Also, since our agent does not move horizontally, we only used its vertical coordinate.
+To simplify things even further, we decided to look only at the relative vertical position of our agent's paddle and the ball:
+
+\[\mathit{rel\_pos} = \begin{cases}
+                          1 & \mathit{paddle\_pos} > \mathit{ball\_pos} \\
+                          0 & \mathit{paddle\_pos} = \mathit{ball\_pos} \\
+                          -1 & \mathit{paddle\_pos} < \mathit{ball\_pos}
+\end{cases}
+\]
+
+Additionally, we added both coordinates of the ball to the state representation, rounded to one decimal point.
+Finally, our state representation contains an integer between 0 and 5, representing one of the six possible directions of the ball.
+After all this simplification, a game state had the following form,\[\texttt{\lq[-1, 0.5, 0.5, 2]\rq},\] which in one of our experiments led the Q-table to have 666 entries after 350 episodes.
+
+\subsubsection{Tuning Parameters}
+In order to start with the parameter tuning from a reasonable point, we used the $\alpha$, $\gamma$ and $\epsilon$ values from the provided \href{https://www.learndatasci.com/tutorials/reinforcement-q-learning-scratch-python-openai-gym/}{tutorial} for our agent.
+We discovered that with an $\epsilon$ value of 0.2, our agent performed even better, so we changed it.
+For the minimum $\epsilon$ and the $\epsilon$-decay values, we decided to go with the same values as we used in the multi-armed bandit.
+As our agent was already performing very good at that stage, achieving a score of around 2000 for \textit{wins - losses} after about 350 episodes, we decided to not change the parameters further.
+Finally, our parameter tuning resolved in the following values for our parameters:
+\[\alpha = 0.1, \gamma = 0.6, \epsilon = 0.2, \epsilon_\mathit{min} = 0.01, \epsilon_\mathit{decay} = 0.97.\]
+
+\subsection{Results}\label{subsec:pong-results}
+With our state space discretization and our tuned parameters, our pong agent was able to achieve a \textit{wins - losses} score of around 2000 after 350 episodes.
+Since the goal was a score of at least 1000 at that stage, we were satisfied with our results and did not improve the agent further.
+
+\subsection{Further Optimization}\label{subsec:pong-further-optimization}
+Our pong agent possibly could be improved by testing out combinations of a wider range of parameters systematically with a script.
+Also, testing alternative state space abstractions could improve the agent.
+
 
 \end{document}
