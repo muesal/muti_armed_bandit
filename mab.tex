@@ -35,7 +35,7 @@
 
 %% start the content for multi armed bandit followed by pong
 \section{Multi-Armed Bandit}\label{sec:mab}
-We start by describing the improvements we did on the multi-armed bandit, the results we reached and further work that could be done to improve the bandit.
+We start by describing the improvements we did on the multi-armed bandit, the results we achieved and further work that could be done to improve the bandit.
 
 \subsection{Improving the Bandit}\label{subsec:improving-the-bandit}
 In order to improve the bandit, we first introduced $\epsilon$-decay.
@@ -50,12 +50,12 @@ We implemented the sliding window concept using two arrays: one for the frequenc
 The expected value of each arm is then computed from the values in those two arrays.
 
 This method ensures that all arms are regularly tested.
-If one window per arm or no window at all is used, arms that give a bad reward for the first pull are never tried again, and possible changes in the environment can not be adapted to.
+If one window per arm or no window at all is used, arms that give a bad reward for the first pull are likely to be never tried again, and possible changes in the environment can not be adapted to.
 With the sliding window over all arms this is prevented, and a good balance between exploitation and exploration can be achieved.
 
 \subsubsection{Tuning Parameters}
 The siding window turned out to yield the best results with a size of 38.
-Then, all twenty simulations are won.
+With that value, all twenty simulations are won.
 When only using $\epsilon$-decay, the best parameters are a decay of 0.97 after each iteration, until epsilon reaches a minimal value of 0.01.
 All these parameter values were obtained by running the program with different values and choosing the ones that yielded the highest amount of won simulations.
 
@@ -63,18 +63,15 @@ All these parameter values were obtained by running the program with different v
 \subsection{Results}\label{subsec:mab-results}
 With the sliding window, our bandit wins twenty out of twenty simulations.
 This shows that it finds good arms quickly, and also adapts to change in the environment fast.
-Our approach seems to be a good balance between exploitation and exploration.
 
 Using $\epsilon$-decay without the sliding window led to the agent winning thirteen of the simulations, but the bandit focused mostly on one arm.
-The bad rewards some arms got in the first simulation(s) led them to hardly be explored anymore.
+The bad rewards some arms got in the first simulation(s) led them to hardly be explored further.
 The combination of both the sliding window and $\epsilon$-decay led to the bandit winning seventeen out of the twenty simulations.
 We assume this is due to the fact that the sliding window alone provides a good exploration-exploitation balance already, and the $\epsilon$-decay interferes with that.
 
 
 \subsection{Further Optimization}\label{subsec:mab-further-optimization}
-In each simulation, we only need a reward 35\% higher than the naive implementation's.
-It would be interesting to see how our agent performs against other optimized agents.
 We tuned the parameters of our agent by hand, they probably could be improved using a script that tests a wider range of values systematically.
-%Per simulation, we only get a reward 35\% higher than a naive implementation, would be interesting to see whether we could win against other optimized algorithms like the ones stated in tha papers
+To further optimize, it would be interesting to run our agent against other optimized agents.
 
 \end{document}
